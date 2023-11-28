@@ -19,6 +19,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:image" content="추가파일/썸네일 (1).png" />
     <title>떨어지는 선생 피하기</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.0.1/firebase-app.js"></script>
@@ -44,5 +45,25 @@
     <!-- "loadingText" ID를 가진 <div> 요소 -->
     <div id="loadingText">Loading...</div>
     <script src="game.js"></script>
+     <script>
+        var backPressCount = 0;
+
+        window.addEventListener('popstate', function (event) {
+            if (event.state && event.state.page === 'closed') {
+                alert('한번더 누르면 종료됩니다.');
+                window.close();
+            } else {
+                backPressCount++;
+                if (backPressCount >= 2) {
+                    window.close();
+                }
+                setTimeout(function () {
+                    backPressCount = 0;
+                }, 1000);
+            }
+
+            history.pushState({ page: 'closed' }, null, null);
+        });
+    </script>
 </body>
 </html>

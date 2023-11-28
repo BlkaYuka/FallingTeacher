@@ -495,8 +495,8 @@ var play_level_1 ={
     monster_extra_speed : 15,
     heal_respawn : 100,
     weapon_respawn : 100,
-    per_sec_score :2,
-    score_respawn : 30,
+    per_sec_score :1,
+    score_respawn : 40,
     bomb_respawn : 50,
     random_bomb_max : 0,
     random_bomb_min : -10,
@@ -515,11 +515,11 @@ var play_level_2 ={
     score_respawn : 30,
     per_sec_score :3,
     random_socre_min : 0,
-    random_socre_max : 20,
+    random_socre_max : 30,
     game_max_health :3,
     bomb_respawn : 40,
     random_bomb_max : -0,
-    random_bomb_min : -20,
+    random_bomb_min : -30,
     
 };
 
@@ -530,14 +530,14 @@ var play_level_3 ={
     monster_extra_speed : 10,
     heal_respawn : 200,
     weapon_respawn : 200,
-    score_respawn : 10,
-    per_sec_score :5,
+    score_respawn : 20,
+    per_sec_score :10,
     random_socre_min : 0,
-    random_socre_max : 50,
+    random_socre_max : 100,
     game_max_health :3,
     bomb_respawn : 30,
     random_bomb_max : 0,
-    random_bomb_min : -50,
+    random_bomb_min : -100,
     
 };
 var play_character = {
@@ -744,10 +744,8 @@ function preload() { // 첫번째로 실행됨 -  주로 데이터 로딩
         url = 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js';
         this.load.plugin('rextexteditplugin', url, true);
     
-        this.load.audio('bgm_m1', './6. 배경음/배경음1.wav');
-        this.load.audio('bgm_m3', './6. 배경음/배경음3.wav');
-        this.load.audio('bgm_m4', './6. 배경음/배경음4.wav');
-        this.load.audio('bgm_m2', './6. 배경음/배경음2.wav');
+        this.load.audio('bgm_m1', './6. 배경음/배경음메인.mp3');
+        this.load.audio('bgm_m2', './6. 배경음/배경음게임.mp3');
 
         this.load.audio('hit_m', './7. 효과음/피격음.mp3');
         this.load.audio('choice_m0', './7. 효과음/선택_노노미.mp3');
@@ -1074,8 +1072,6 @@ function create() {
   
     bgm_1 = this.sound.add('bgm_m1', { loop: true });
     bgm_2 = this.sound.add('bgm_m2', { loop: true });
-    bgm_3 = this.sound.add('bgm_m3', { loop: true });
-    bgm_4 = this.sound.add('bgm_m4', { loop: true });
     end_w = this.sound.add('end_music_w');
 
     hit_m = this.sound.add('hit_m');
@@ -1903,8 +1899,6 @@ function sound_set(num){
     var s = togle_max_x - togle_min_x ;
     bgm_1.setVolume((start_setting_togle1.x - togle_min_x)/(s+6000));
     bgm_2.setVolume((start_setting_togle1.x - togle_min_x)/(s+6000));
-    bgm_3.setVolume((start_setting_togle1.x - togle_min_x)/(s+6000));
-    bgm_4.setVolume((start_setting_togle1.x - togle_min_x)/(s+6000));
 
     end_w.setVolume((start_setting_togle1.x - togle_min_x)/s);
     warning_m.setVolume((start_setting_togle1.x - togle_min_x) /s);
@@ -1934,7 +1928,7 @@ function sound_set(num){
     close_m.setVolume((start_setting_togle1.x - togle_min_x ) /s);
     touch_m.setVolume((start_setting_togle1.x - togle_min_x ) /s);
     get_item_m.setVolume((start_setting_togle1.x - togle_min_x) /s);
-    expolosion_m.setVolume((start_setting_togle1.x - togle_min_x)/s);
+    expolosion_m.setVolume((start_setting_togle1.x - togle_min_x)*0.7/s);
 }
 function change_characher(num){
     if(num == 0){
@@ -2235,8 +2229,6 @@ function change_layer(){
         if(bgm_1.isPlaying == false){
             bgm_1.play();
             bgm_2.stop();
-            bgm_3.stop();
-            bgm_4.stop();
         }
         else{
         }
@@ -2312,22 +2304,8 @@ function change_layer(){
     {  
 
         bgm_1.stop();
-        if(bgm_2.isPlaying == true||bgm_3.isPlaying == true||bgm_4.isPlaying == true){
-        
-        }
-        else{
-            var rand = Math.floor(Math.random() * 3);
-            if(rand == 0){
-                bgm_2.play();
-            }
-            else if(rand == 1){
-                bgm_3.play();   
-            }
-            else if(rand == 2){
-                
-                bgm_4.play();
-            }
-        }
+
+         bgm_2.play();
 
         skill_gaze_text.setVisible(true);
         skill_button.setVisible(true);
@@ -2790,7 +2768,7 @@ function collsize(){
             if(Math.abs(game_drop_bomb.x - player_unit.x)  < game_drop_bomb.width/2 + player_unit.width/2 - 20){
                 if(Math.abs(game_drop_bomb.y - player_unit.y)  < game_drop_bomb.height/2 + player_unit.height/2)
                 {  
-                    get_item_m.play();
+                    expolosion_m.play();
                     game_score += Phaser.Math.Between(play_level.random_bomb_min, play_level.random_bomb_max);
                     text_color_time = -150;
                     if(game_score <=0)
@@ -3622,8 +3600,6 @@ function update() { // update 함수
     }
     else if(ingame_type == "die_first"){ 
             bgm_2.stop();
-            bgm_3.stop();
-            bgm_4.stop();
             const leaderboard = new Leaderboard();
             leaderboard.addScore(game_score, {
                 character: character_choice_num + 1,
