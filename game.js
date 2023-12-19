@@ -1039,7 +1039,7 @@ function create() {
         }
     });
     this.input.on('pointerup', function (pointer) { //마우스 클릭이 끝났을때
-        
+
         if(game_type == "in_game"&&ingame_type == "game"&&joy_is == true&&joy_point_num == pointer.id)
         {
 
@@ -1954,8 +1954,8 @@ function reader_show_one(tx,ty,i){
 }
 function sound_set(num){
     var s = togle_max_x - togle_min_x ;
-    bgm_1.setVolume((start_setting_togle1.x - togle_min_x)/s);
-    bgm_2.setVolume((start_setting_togle1.x - togle_min_x)/s);
+    bgm_1.setVolume((start_setting_togle1.x - togle_min_x)*0.9/s);
+    bgm_2.setVolume((start_setting_togle1.x - togle_min_x)*0.9/s);
 
     end_w.setVolume((start_setting_togle1.x - togle_min_x)/s);
     warning_m.setVolume((start_setting_togle1.x - togle_min_x)*3 /s);
@@ -2817,10 +2817,11 @@ function collsize(){
                             if(hit_timer == 0)
                             {
                             if(character_choice_num == 2&&play_character.skill_gaze > 0){
-                                skill_m_2.play();
+                                impact_m_2.play();
                                 if(play_character.skill_gaze == 100){
                                 skill_motion.bind(this)();
-                                impact_m_2.play();
+                                
+                                skill_m_2.play();
                                 }
                                 play_character.skill_gaze-=20;
                                 skill_timer =Date.now();
