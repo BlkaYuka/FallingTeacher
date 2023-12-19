@@ -27,7 +27,7 @@ var config = {
 // 스파게티 전문점에 오신걸 환영합니다. 
 var back_start;
 var back_game;
-
+var joy_point_num;
 var joy_stick_out;
 var joy_stick_in;
 var joy_is;
@@ -1020,11 +1020,12 @@ function create() {
      loadingText.style.display = 'none';
     arrow = this.input.keyboard.createCursorKeys();
     this.input.on('pointerdown', function (pointer) {
-        if(game_type == "in_game"&&(ingame_type == "first"||ingame_type == "game"||ingame_type == "warning"))
+        if(game_type == "in_game"&&(ingame_type == "first"||ingame_type == "game"||ingame_type == "warning"&&joy_is == false))
         {
             
             if(Math.abs(pointer.y - skill_button.y) > skill_button.height/2&&Math.abs(pointer.y - game_menu_button.y) > game_menu_button.height/2)
              {
+                joy_point_num = pointer.id;
                 joy_stick_out.setVisible(true);
             joy_stick_in.setVisible(true);
             
@@ -1038,7 +1039,7 @@ function create() {
         }
     });
     this.input.on('pointerup', function () { //마우스 클릭이 끝났을때
-        if(game_type == "in_game"&&ingame_type == "game"&&joy_is == true)
+        if(game_type == "in_game"&&ingame_type == "game"&&joy_is == true&&joy_point_num == pointer.id)
         {
 
             joy_stick_out.setVisible(false);
@@ -1056,7 +1057,7 @@ function create() {
     });
     this.input.on('pointermove', function (pointer) { //마우스를 움직일 때
          
-         if(game_type == "in_game"&&ingame_type == "game"&&joy_is == true)
+         if(game_type == "in_game"&&ingame_type == "game"&&joy_is == true&&joy_point_num == pointer.id)
         {
             var jx = pointer.x - joy_stick_out.x;
             var jy = pointer.y - joy_stick_out.y;
