@@ -27,6 +27,10 @@ var config = {
 // 스파게티 전문점에 오신걸 환영합니다. 
 var back_start;
 var back_game;
+
+var joy_stick_out;
+var joy_stick_in;
+var joy_is;
 var die_timer = 0;
 var score_text;
 var skill_gaze_text;
@@ -543,7 +547,7 @@ var play_level_3 ={
 var play_character = {
     cx : 540,
     cy : 1700,
-    speed : 15,
+    speed : 18,
     skill_gaze : 100,
     vector : 1,
 }
@@ -744,8 +748,8 @@ function preload() { // 첫번째로 실행됨 -  주로 데이터 로딩
         url = 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rextexteditplugin.min.js';
         this.load.plugin('rextexteditplugin', url, true);
     
-        this.load.audio('bgm_m1', './6. 배경음/배경음메인.mp3');
-        this.load.audio('bgm_m2', './6. 배경음/배경음게임.mp3');
+        this.load.audio('bgm_m1', './6. 배경음/배경음1.mp3');
+        this.load.audio('bgm_m2', './6. 배경음/배경음2.mp3');
 
         this.load.audio('hit_m', './7. 효과음/피격음.mp3');
         this.load.audio('choice_m0', './7. 효과음/선택_노노미.mp3');
@@ -793,6 +797,8 @@ function preload() { // 첫번째로 실행됨 -  주로 데이터 로딩
     this.load.image('game_bg', './2. 게임화면/배경이미지.png');
 
 
+    this.load.image('joy_out_img', './2. 게임화면/바깥 원.png');
+    this.load.image('joy_in_img', './2. 게임화면/안쪽 원.png');
 
     this.load.image('back_image', './1. 메인화면/background_b.png');
     this.load.image('game_bg1', './2. 게임화면/배경1.png');
@@ -1010,28 +1016,37 @@ function copyTextToClipboard(text) {
 }
 
 function create() {
-    this.input.addPointer(2); 
+    this.input.addPointer(5); 
      loadingText.style.display = 'none';
     arrow = this.input.keyboard.createCursorKeys();
     this.input.on('pointerdown', function (pointer) {
-        if(game_type == "in_game")
+        if(game_type == "in_game"&&(ingame_type == "first"||ingame_type == "game"||ingame_type == "warning"))
         {
-            if(pointer.x < 540 && (Math.abs(pointer.x - skill_button.x) > skill_button.width /2||Math.abs(pointer.y - skill_button.y) > skill_button.height/2))
+            
+            if(Math.abs(pointer.y - skill_button.y) > skill_button.height/2&&Math.abs(pointer.y - game_menu_button.y) > game_menu_button.height/2)
              {
-                touch_m_left= true;
-                touch_m_right = false;
+                joy_stick_out.setVisible(true);
+            joy_stick_in.setVisible(true);
+            
+            joy_stick_in.x = pointer.x;
+            joy_stick_in.y = pointer.y;
+            joy_stick_out.x = pointer.x;
+            joy_stick_out.y = pointer.y;
+            joy_is = true;
             }
-            else if(pointer.x > 540&&(Math.abs(pointer.x - skill_button.x) > skill_button.width /2||Math.abs(pointer.y - skill_button.y) > skill_button.height/2)){
-                touch_m_right = true;
-                touch_m_left = false;
-            }
+           
         }
     });
     this.input.on('pointerup', function () { //마우스 클릭이 끝났을때
-        togle1_drag =false;
-        togle2_drag =false;
-        touch_m_left = false;
-        touch_m_right =false;
+        if(game_type == "in_game"&&ingame_type == "game"&&joy_is == true)
+        {
+
+            joy_stick_out.setVisible(false);
+            joy_stick_in.setVisible(false);
+            joy_is = false;
+            touch_m_left = false;
+            touch_m_right =false;
+        }
         for(var i = 0 ; i <animation_bool.length ; i++){ // 모든 클릭 버튼 탐색
             if(animation_bool[i] == false){ //크기가 전부 줄어든 버튼일경우 역순으로 바꾸고 시간 초기화
                 animation_bool[i] = true;
@@ -1040,7 +1055,32 @@ function create() {
         }
     });
     this.input.on('pointermove', function (pointer) { //마우스를 움직일 때
-        
+         
+         if(game_type == "in_game"&&ingame_type == "game"&&joy_is == true)
+        {
+            var jx = pointer.x - joy_stick_out.x;
+            var jy = pointer.y - joy_stick_out.y;
+               // console.log(Math.abs((joy_stick_in.x - joy_stick_out.x)*(joy_stick_in.y - joy_stick_out.y)));
+            if(jx*jx + jy*jy >= 150*150 ){
+                
+                joy_stick_in.x = joy_stick_out.x+jx*150/Math.sqrt(jx*jx + jy*jy);
+                joy_stick_in.y = joy_stick_out.y+jy*150/Math.sqrt(jx*jx + jy*jy);
+            }
+            else{
+                joy_stick_in.x = pointer.x;
+                joy_stick_in.y = pointer.y;
+            }
+            if(jx < 0 ){
+            touch_m_left = true;
+            touch_m_right =false;
+            }
+            else{
+               
+            touch_m_left = false;
+            touch_m_right =true;
+            }
+
+        }
         if(togle1_drag){ //토글 클릭시 
 
             sound_set.bind(this)();
@@ -1091,7 +1131,7 @@ function create() {
     choice_m_5 = this.sound.add('choice_m5');
 
     impact_m_0 = this.sound.add('impact_m0', { loop: true });
-    impact_m_1 = this.sound.add('impact_m1', { loop: true });
+    impact_m_1 = this.sound.add('impact_m1');
     impact_m_2 = this.sound.add('impact_m2');
     impact_m_3 = this.sound.add('impact_m3');
     impact_m_4 = this.sound.add('impact_m4');
@@ -1139,6 +1179,15 @@ function create() {
     // - 유튜브 버튼
 
     start_dog = this.add.image(695+129, 294+116, 'start_dog_ui').setInteractive(); 
+    start_dog.on('pointerdown', function () {
+        if(game_type == "start")
+            button_down_animation(start_dog);
+    });
+    start_dog.on('pointerup', function () {
+        if(game_type == "start")
+            button_up_animation(start_dog);
+    });
+ 
 
     start_setting = this.add.image(751+73, 43+65, 'start_setting_ui').setInteractive(); 
     start_setting.on('pointerdown', function () {
@@ -1566,6 +1615,12 @@ back_game = this.add.image(540, 960, 'back_image').setInteractive(); // 배경�
         button_up_animation(close_button);
     });
 
+    joy_stick_in = this.add.image(695+129, 294+116, 'joy_in_img').setInteractive();
+    joy_stick_out = this.add.image(695+129, 294+116, 'joy_out_img').setInteractive();
+
+    joy_stick_out.setVisible(false);
+    joy_stick_in.setVisible(false);
+    joy_is = false;    
 
     layer_clear.bind(this)("start_read");
     layer_clear.bind(this)("start_imfor");
@@ -1897,34 +1952,33 @@ function reader_show_one(tx,ty,i){
 }
 function sound_set(num){
     var s = togle_max_x - togle_min_x ;
-    bgm_1.setVolume((start_setting_togle1.x - togle_min_x)/(s+6000));
-    bgm_2.setVolume((start_setting_togle1.x - togle_min_x)/(s+6000));
+    bgm_1.setVolume((start_setting_togle1.x - togle_min_x)/s);
+    bgm_2.setVolume((start_setting_togle1.x - togle_min_x)/s);
 
     end_w.setVolume((start_setting_togle1.x - togle_min_x)/s);
-    warning_m.setVolume((start_setting_togle1.x - togle_min_x) /s);
+    warning_m.setVolume((start_setting_togle1.x - togle_min_x)*3 /s);
+    skill_m_0.setVolume((start_setting_togle2.x - togle_min_x)*3 /s);
+    skill_m_1.setVolume((start_setting_togle2.x - togle_min_x)*3 /s);
+    skill_m_2.setVolume((start_setting_togle2.x - togle_min_x)*3 /s);
+    skill_m_3.setVolume((start_setting_togle2.x - togle_min_x)*3 /s);
+    skill_m_4.setVolume((start_setting_togle2.x - togle_min_x)*3 /s);
+    skill_m_5.setVolume((start_setting_togle2.x - togle_min_x)*3 /s);
 
-    skill_m_0.setVolume((start_setting_togle2.x - togle_min_x) /s);
-    skill_m_1.setVolume((start_setting_togle2.x - togle_min_x) /s);
-    skill_m_2.setVolume((start_setting_togle2.x - togle_min_x) /s);
-    skill_m_3.setVolume((start_setting_togle2.x - togle_min_x) /s);
-    skill_m_4.setVolume((start_setting_togle2.x - togle_min_x) /s);
-    skill_m_5.setVolume((start_setting_togle2.x - togle_min_x) /s);
-
-    impact_m_0.setVolume((start_setting_togle1.x - togle_min_x)*2 /s);
-    impact_m_1.setVolume((start_setting_togle1.x - togle_min_x)*2 /s);
-    impact_m_2.setVolume((start_setting_togle1.x - togle_min_x)*2 /s);
-    impact_m_3.setVolume((start_setting_togle1.x - togle_min_x)*2 /s);
-    impact_m_4.setVolume((start_setting_togle1.x - togle_min_x)*2 /s);
-    impact_m_5.setVolume((start_setting_togle1.x - togle_min_x)*2 /s);
+    impact_m_0.setVolume((start_setting_togle1.x - togle_min_x)*3 /s);
+    impact_m_1.setVolume((start_setting_togle1.x - togle_min_x)*3 /s);
+    impact_m_2.setVolume((start_setting_togle1.x - togle_min_x)*3 /s);
+    impact_m_3.setVolume((start_setting_togle1.x - togle_min_x)*3 /s);
+    impact_m_4.setVolume((start_setting_togle1.x - togle_min_x)*3 /s);
+    impact_m_5.setVolume((start_setting_togle1.x - togle_min_x)*3 /s);
     hit_m.setVolume((start_setting_togle1.x - togle_min_x) /s);
 
 
-    choice_m_0.setVolume((start_setting_togle2.x - togle_min_x)/s);
-    choice_m_1.setVolume((start_setting_togle2.x- togle_min_x)/s);
-    choice_m_2.setVolume((start_setting_togle2.x- togle_min_x)/s);
-    choice_m_3.setVolume((start_setting_togle2.x- togle_min_x)/s);
-    choice_m_4.setVolume((start_setting_togle2.x- togle_min_x)/s);
-    choice_m_5.setVolume((start_setting_togle2.x- togle_min_x)/s);
+    choice_m_0.setVolume((start_setting_togle2.x - togle_min_x)*2/s);
+    choice_m_1.setVolume((start_setting_togle2.x- togle_min_x)*2/s);
+    choice_m_2.setVolume((start_setting_togle2.x- togle_min_x)*2/s);
+    choice_m_3.setVolume((start_setting_togle2.x- togle_min_x)*2/s);
+    choice_m_4.setVolume((start_setting_togle2.x- togle_min_x)*2/s);
+    choice_m_5.setVolume((start_setting_togle2.x- togle_min_x)*2/s);
     close_m.setVolume((start_setting_togle1.x - togle_min_x ) /s);
     touch_m.setVolume((start_setting_togle1.x - togle_min_x ) /s);
     get_item_m.setVolume((start_setting_togle1.x - togle_min_x) /s);
@@ -2109,8 +2163,12 @@ function layer_clear(type){ //레이어
         menu_giveup.setVisible(false);
         menu_score_text.setVisible(false);
         close_button.setVisible(false);
+        joy_stick_out.setVisible(false);
+        joy_stick_in.setVisible(false);
+        joy_is = false;
     }
     else if(type == "end_game"){
+       
         reader_hide.bind(this)();
         back_game.setVisible(false);
         end_outbox.setVisible(false);
@@ -2122,6 +2180,10 @@ function layer_clear(type){ //레이어
 }
 function clear_game(){
     
+    joy_stick_out.setVisible(false);
+    joy_stick_in.setVisible(false);
+    joy_is = false;    
+
          player_unit.setTexture('play_ball_' + (character_choice_num+1).toString());
     player_unit.setAlpha(1);
     game_score_text.setStyle({ fill: 'white' });
@@ -2173,7 +2235,11 @@ function clear_game(){
 }
 function reset_game(){
 
-        player_unit.setTexture('play_ball_' + (character_choice_num+1).toString());
+    joy_stick_out.setVisible(false);
+    joy_stick_in.setVisible(false);
+    joy_is = false;    
+
+    player_unit.setTexture('play_ball_' + (character_choice_num+1).toString());
     player_unit.setAlpha(1);
     game_score_text.setStyle({ fill: 'white' });
     monster_timer = 0;
@@ -2324,7 +2390,9 @@ function change_layer(){
         }
     }
     else if(game_type == "game_menu"){
-
+         joy_stick_out.setVisible(false);
+        joy_stick_in.setVisible(false);
+        joy_is = false;
         back_game.setVisible(true);
         menu_box.setVisible(true);
         menu_replay.setVisible(true);
@@ -2336,7 +2404,10 @@ function change_layer(){
         close_button.y = 685;
         close_button.setVisible(true);
     }
-    else if(game_type == "end_game"){;
+    else if(game_type == "end_game"){
+         joy_stick_out.setVisible(false);
+        joy_stick_in.setVisible(false);
+        joy_is = false;
         back_game.setVisible(true);
         end_outbox.setVisible(true);
         end_share_button.setVisible(true);
@@ -2370,6 +2441,33 @@ function button_up_animation(button2){ ////point up - 버튼 클릭시 줄어드
     }
 }
 
+ function requestFullscreen() {
+        var element = document.documentElement;
+
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
+        }
+    }
+
+    // 전체 화면에서 나가는 함수
+    function exitFullscreen() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+
 async function button_fun(button1){//클릭 애니메이션 이후 버튼 발동
   if(button1 == start_readerbord && game_type != "start_read"){
     game_type = "start_read";
@@ -2383,6 +2481,16 @@ async function button_fun(button1){//클릭 애니메이션 이후 버튼 발동
     change_layer.bind(this)();
 
         touch_m.play();
+  }
+  else if(button1 == start_dog&& game_type != "start_imfor"){
+   var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+
+        if (!fullscreenElement) {
+            requestFullscreen();
+        } else {
+            exitFullscreen();
+        }
+    touch_m.play();
   }
   else if(button1 == game_menu_button&& game_type != "game_menu"){
     game_type = "game_menu";
@@ -2704,12 +2812,12 @@ function collsize(){
                 if(Math.abs(game_monster_arr[i][0] - player_unit.x)  < game_monster_image[i].width/2 + player_unit.width/2 - 10){
                     if(Math.abs(game_monster_arr[i][1] - player_unit.y)  < game_monster_image[i].height/2 + player_unit.height/2 - 10)
                     {  
-                            if(hit_timer == 0){
+                            if(hit_timer == 0)
+                            {
                             if(character_choice_num == 2&&play_character.skill_gaze > 0){
-
+                                skill_m_2.play();
                                 if(play_character.skill_gaze == 100){
                                 skill_motion.bind(this)();
-                                skill_m_2.play();
                                 impact_m_2.play();
                                 }
                                 play_character.skill_gaze-=20;
@@ -2849,8 +2957,7 @@ function key_pc(){
             touch_right =false;
         }
         if(arrow.down.isDown && skill_cool == false){
-            
-            if(aris_power == 0 && character_choice_num == 3&&skill_is == false){
+            if(aris_power == 0 && character_choice_num == 3&&skill_is == false&&play_character.skill_gaze > 0){
                 play_character.skill_gaze -= 33;
                 if(play_character.skill_gaze <= 0){
                     play_character.skill_gaze = 0;
@@ -2864,7 +2971,6 @@ function key_pc(){
                     play_character.skill_gaze = 0;
                 }
             }
-
             else {
             skill_use.bind(this)();
             skill_cool = true;
@@ -2875,6 +2981,7 @@ function key_pc(){
 
         if(arrow.down.isUp){
             if(character_choice_num == 3 &&aris_power > 0 && aris_skill_is == false){
+
                 skill_use.bind(this)();
                 skill_cool = false;
             }
@@ -3019,9 +3126,6 @@ function skill_sound(){
         if(character_choice_num == 0 ){
             impact_m_0.play();
         }
-        else if(character_choice_num == 1 ){
-            impact_m_1.play();
-        }
         else if(character_choice_num == 5 ){
             impact_m_5.play();
         }
@@ -3032,9 +3136,6 @@ function skill_sound(){
         sound_is = false;
         if(character_choice_num == 0 ){
             impact_m_0.stop();
-        }
-        else if(character_choice_num == 1 ){
-            impact_m_1.stop();
         }
         else if(character_choice_num == 5 ){
             impact_m_5.stop();
@@ -3151,7 +3252,7 @@ function hina_skill(){
 function yuuka_skill(){
     if(skill_is == true)
     {
-        if(Date.now() - skill_timer > 150&&play_character.skill_gaze > 0){
+        if(Date.now() - skill_timer > 100&&play_character.skill_gaze > 0){
             skill_timer = Date.now();
             play_character.skill_gaze -= 1;
             
@@ -3279,6 +3380,7 @@ function skill_use(){
                 skill_timer = Date.now();
                 skill_motion.bind(this)();
                 skill_m_1.play();
+                impact_m_1.play();
                 }
                 skill_is = true;
             }
@@ -3523,7 +3625,7 @@ function update() { // update 함수
 
 
         if(ingame_type == "first"){
-
+              warning_m.play();
             setting_level.bind(this)();
             setting_tier_score.bind(this)();
             cul_score.bind(this)(0);
@@ -3533,7 +3635,7 @@ function update() { // update 함수
 
             timer = Date.now();
             ingame_type = "warning"; 
-            warning_m.play();
+          
         }
         else if(ingame_type == "warning" && (Date.now() - timer)/1000 < 2) 
         {
