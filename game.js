@@ -1020,7 +1020,7 @@ function create() {
      loadingText.style.display = 'none';
     arrow = this.input.keyboard.createCursorKeys();
     this.input.on('pointerdown', function (pointer) {
-        if(game_type == "in_game"&&(ingame_type == "first"||ingame_type == "game"||ingame_type == "warning"&&joy_is == false))
+        if(game_type == "in_game"&&(ingame_type == "first"||ingame_type == "game"||ingame_type == "warning")&&joy_is == false)
         {
             
             if(Math.abs(pointer.y - skill_button.y) > skill_button.height/2&&Math.abs(pointer.y - game_menu_button.y) > game_menu_button.height/2)
@@ -1038,7 +1038,8 @@ function create() {
            
         }
     });
-    this.input.on('pointerup', function () { //마우스 클릭이 끝났을때
+    this.input.on('pointerup', function (pointer) { //마우스 클릭이 끝났을때
+        
         if(game_type == "in_game"&&ingame_type == "game"&&joy_is == true&&joy_point_num == pointer.id)
         {
 
