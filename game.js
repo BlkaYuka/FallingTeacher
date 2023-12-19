@@ -601,6 +601,7 @@ var nick_test_is = false; // 닉네임 중복확인
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@----시작화면
 var start_button; // 시작버튼
 var start_dog; // 멍멍이
+var start_screen;
 var start_readerbord; // 리더보드 버튼
 var start_youtube; // 유튜브 버튼
 var start_setting; // 설정 버튼
@@ -809,6 +810,8 @@ function preload() { // 첫번째로 실행됨 -  주로 데이터 로딩
     this.load.image('game_share_button_ui', './4. 게임결과/점수 공유하기 버튼.png');
     
     this.load.image('start_dog_ui', './1. 메인화면/피하기 로고.png');
+
+    this.load.image('start_screen_ui', './1. 메인화면/screen.png');
     this.load.image('start_button_ui', './1. 메인화면/게임시작 버튼.png');
     this.load.image('start_readerbord_ui', './1. 메인화면/리더보드 버튼.png');
     this.load.image('start_setting_ui', './1. 메인화면/환경설정 버튼.png');
@@ -1181,13 +1184,16 @@ function create() {
     // - 유튜브 버튼
 
     start_dog = this.add.image(695+129, 294+116, 'start_dog_ui').setInteractive(); 
-    start_dog.on('pointerdown', function () {
+    
+
+    start_screen = this.add.image(100, 100, 'start_screen_ui').setInteractive(); 
+    start_screen.on('pointerdown', function () {
         if(game_type == "start")
-            button_down_animation(start_dog);
+            button_down_animation(start_screen);
     });
-    start_dog.on('pointerup', function () {
+    start_screen.on('pointerup', function () {
         if(game_type == "start")
-            button_up_animation(start_dog);
+            button_up_animation(start_screen);
     });
  
 
@@ -2057,6 +2063,7 @@ function layer_clear(type){ //레이어
         start_setting.setVisible(false);
         start_readerbord.setVisible(false);
         start_dog.setVisible(false);
+        start_screen.setVisible(false);
     }
     else if(type == "start_read"){
         fetchScoresAndSetFlag.bind(this)(); //new!
@@ -2185,7 +2192,16 @@ function clear_game(){
     joy_stick_out.setVisible(false);
     joy_stick_in.setVisible(false);
     joy_is = false;    
+    for(var s = 0 ; s < 11; s++){
 
+    reader_bg_image[s].setVisible(false);
+    reader_score_text[s].setVisible(false);
+    reader_rank_text[s].setVisible(false);
+    reader_level_image[s].setVisible(false);
+    reader_tier_image[s].setVisible(false);
+    reader_name_text[s].setVisible(false);
+    reader_character_image[s].setVisible(false);
+    }
          player_unit.setTexture('play_ball_' + (character_choice_num+1).toString());
     player_unit.setAlpha(1);
     game_score_text.setStyle({ fill: 'white' });
@@ -2241,6 +2257,16 @@ function reset_game(){
     joy_stick_in.setVisible(false);
     joy_is = false;    
 
+    for(var s = 0 ; s < 11; s++){
+
+    reader_bg_image[s].setVisible(false);
+    reader_score_text[s].setVisible(false);
+    reader_rank_text[s].setVisible(false);
+    reader_level_image[s].setVisible(false);
+    reader_tier_image[s].setVisible(false);
+    reader_name_text[s].setVisible(false);
+    reader_character_image[s].setVisible(false);
+    }
     player_unit.setTexture('play_ball_' + (character_choice_num+1).toString());
     player_unit.setAlpha(1);
     game_score_text.setStyle({ fill: 'white' });
@@ -2308,6 +2334,7 @@ function change_layer(){
         start_setting.setVisible(true);
         start_readerbord.setVisible(true);
         start_dog.setVisible(true);
+          start_screen.setVisible(true);
         //
     }
     else if(game_type == "start_read"){
@@ -2484,7 +2511,7 @@ async function button_fun(button1){//클릭 애니메이션 이후 버튼 발동
 
         touch_m.play();
   }
-  else if(button1 == start_dog&& game_type != "start_imfor"){
+  else if(button1 == start_screen&& game_type != "start_imfor"){
    var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
 
         if (!fullscreenElement) {
