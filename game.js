@@ -2734,7 +2734,7 @@ async function button_fun(button1){//클릭 애니메이션 이후 버튼 발동
   else if(start_youtube == button1)
   {
     touch_m.play();
-    window.open('https://youtu.be/Tr-C_0eNpCE', '_blank'); // 이동할 URL을 지정합니다.
+    window.open('https://youtu.be/vWvdhGbIlgE', '_blank'); // 이동할 URL을 지정합니다.
   }
   else if(start_imformation_youtube == button1)
   {
