@@ -795,7 +795,7 @@ function preload() { // 첫번째로 실행됨 -  주로 데이터 로딩
 
     this.load.image('start_bg', './1. 메인화면/배경이미지.png');
     this.load.image('nick_bg', './2. 게임화면/선택이미지.png');
-    this.load.image('game_bg', './2. 게임화면/배경이미지.png');
+    this.load.image('game_bg', './2. 게임화면/배경4.png');
 
 
     this.load.image('joy_out_img', './2. 게임화면/바깥 원.png');
@@ -1058,6 +1058,9 @@ function create() {
                 animation_sec[i] = 5 -animation_sec[i] ; 
             }
         }
+
+        togle1_drag = false;
+        togle2_drag = false;
     });
     this.input.on('pointermove', function (pointer) { //마우스를 움직일 때
          
