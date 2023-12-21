@@ -152,7 +152,7 @@ class Leaderboard {
     
 
     async getScore() {
-        const scoresRef = firebase.database().ref('scores').limitToFirst(120);
+        const scoresRef = firebase.database().ref('scores').limitToLast(120);
         let sortedBoard = [];
     
         await scoresRef.once('value', (snapshot) => {
