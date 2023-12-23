@@ -26,11 +26,13 @@ var config = {
 };
 // 스파게티 전문점에 오신걸 환영합니다. 
 var back_start;
+var keyA,keyD,keyS;
 var back_game;
 var joy_point_num;
 var joy_stick_out;
 var joy_stick_in;
 var joy_is;
+var delete_name = ["                                                                                                                                         ","노무현","무현","일베","창남","창녀","강간","죽이","메갈","한남","한녀","걸레","니애미","섹스","질싸","보지","자지","병신","씨발"];
 var die_timer = 0;
 var score_text;
 var skill_gaze_text;
@@ -236,8 +238,6 @@ class Leaderboard {
     
         // Update the leaderboard in Firebase
         await userRef.set(existingData);
-    
-        console.log("Score and other data updated successfully.");
     }    
     
     
@@ -454,7 +454,6 @@ async function fetchScores() {
             for (let i = 0; i < fetchedData.length; i++) {
                 leader_me_arr[i] = fetchedData[i];
             }
-            console.log("leader_me_arr updated:", leader_me_arr);
         }
     });
     get_reader = result;
@@ -1020,6 +1019,9 @@ function copyTextToClipboard(text) {
 
 function create() {
     this.input.addPointer(5); 
+    keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
      loadingText.style.display = 'none';
     arrow = this.input.keyboard.createCursorKeys();
     this.input.on('pointerdown', function (pointer) {
@@ -1062,13 +1064,12 @@ function create() {
         togle1_drag = false;
         togle2_drag = false;
     });
-    this.input.on('pointermove', function (pointer) { //마우스를 움직일 때
+    this.input.on('pointermove', function (pointer) { 
          
          if(game_type == "in_game"&&ingame_type == "game"&&joy_is == true&&joy_point_num == pointer.id)
         {
             var jx = pointer.x - joy_stick_out.x;
             var jy = pointer.y - joy_stick_out.y;
-               // console.log(Math.abs((joy_stick_in.x - joy_stick_out.x)*(joy_stick_in.y - joy_stick_out.y)));
             if(jx*jx + jy*jy >= 150*150 ){
                 
                 joy_stick_in.x = joy_stick_out.x+jx*150/Math.sqrt(jx*jx + jy*jy);
@@ -1702,7 +1703,6 @@ function reader_show_num(k)
     }
     else if(get_reader.length - k*8 < 8 ){
         var num = get_reader.length - k*8;
-        console.log(num);
         for(var i = 0; i < num ;i++)
         {
             reader_show_one(540,410 + i*140,(k*8+i));
@@ -1748,7 +1748,6 @@ function cul_score(sc){
     }
     semi_socre += sc;
     weight_power +=1;
-    //console.log(weight_power);
     if(semi_socre == 50){
         backPressed = false;
         semi_socre = semi_socre - 50;
@@ -1828,7 +1827,6 @@ async function leader_surround_one(tx,ty,i){
             for (let i = 0; i < fetchedSurroundData.length; i++) {
                 surround_arr[i] = fetchedSurroundData[i];
             }
-            console.log("Surrounding ranks:", surround_arr);
         }
     })
     .catch(err => {
@@ -2219,6 +2217,7 @@ function clear_game(){
     game_drop_weapon.setVisible(false);
     game_drop_score.setVisible(false);
     game_drop_heart.setVisible(false);
+    game_drop_bomb.setVisible(false);
     game_type = "in_game";
     ingame_type ="first"; 
     game_health_point = play_level.game_max_health;
@@ -2286,6 +2285,7 @@ function reset_game(){
     game_drop_weapon.setVisible(false);
     game_drop_score.setVisible(false);
     game_drop_heart.setVisible(false);
+    game_drop_bomb.setVisible(false);
     hit_timer =0;
     ingame_type ="first"; 
     play_character.skill_gaze = 100;
@@ -2321,7 +2321,6 @@ function reset_game(){
 }
 function change_layer(){
     if(game_type == "start"){
-        //console.log("변경123");
         end_w.stop();
         if(bgm_1.isPlaying == false){
             bgm_1.play();
@@ -2451,9 +2450,8 @@ function change_layer(){
 }
 
 function gmae_type_exit(){
-    console.log(game_type_arr);
     var temp = game_type_arr[game_type_arr.length-1];
-    game_type_arr.pop(); //최상단 값 제거
+    game_type_arr.pop(); 
     game_type = game_type_arr[game_type_arr.length-1];
     layer_clear.bind(this)(temp);
     change_layer.bind(this)(); //
@@ -2583,7 +2581,7 @@ async function button_fun(button1){//클릭 애니메이션 이후 버튼 발동
         back_start.setVisible(true);
         game_type = "start_setting";
         game_type_arr.push("start_setting");
-        console.log(game_type_arr);
+        
         change_layer.bind(this)();
     }
 
@@ -2594,15 +2592,24 @@ async function button_fun(button1){//클릭 애니메이션 이후 버튼 발동
         game_type_arr.push("start_setting");
         change_layer.bind(this)();
     }
-    else if(button1 == nick_finish_button){
-        touch_m.play();
-         if (nick_input_text_box.text.indexOf(' ') !== -1) {
+        else if(button1 == nick_finish_button){
+            touch_m.play();
+        var apple = nick_input_text_box.text.toString();
+        for(var i = 0 ; i < delete_name.length ; i++){
+            if(apple.includes(delete_name[i])){
+                alert("부적절한 닉네임 입니다.");
+                return; 
+            }
+        }
+        if (nick_input_text_box.text.indexOf(' ') !== -1) {
             return;
         }
         if (nick_input_text_box.text.length > 8||nick_input_text_box.text.length < 2) {
             
             return;
         }
+
+
         if(nick_test_is == false){
         // 닉네임 중복확인
         const leaderboard = new Leaderboard();
@@ -2853,22 +2860,23 @@ function collsize(){
                                 
                                 skill_m_2.play();
                                 }
-                                play_character.skill_gaze-=20;
+                                play_character.skill_gaze-=33;
+                                if(play_character.skill_gaze == 1 )
+                                    play_character.skill_gaze= 0 ;
+                                    
                                 skill_timer =Date.now();
                                 skill_is=true;
                                 var ag = game_monster_arr[i][0] - player_unit.x;
                                 skill_impact.setRotation(Math.PI / 360 * ag/2);  
                                 skill_impact.x = player_unit.x + ag;
                                 skill_impact.setTexture('skill_churugi');
+                                break;
                             }
 
                             spawn_expolosion(game_monster_image[i].x,game_monster_image[i].y);
                             game_monster_arr.splice(i, 1);
                             if(character_choice_num == 1&&skill_is == true&&play_character.skill_gaze > 0){
                                 
-                            }
-                            else if(character_choice_num == 2&&skill_is == true&&play_character.skill_gaze > 0){
-
                             }
                             else{
                                 hit_m.play();
@@ -2974,22 +2982,22 @@ function skill_motion(){
 }
 var skill_cool = false;
 function key_pc(){
-        if (arrow.left.isDown) {
+        if (arrow.left.isDown||keyA.isDown) {
             touch_left = true;
             touch_right =false;
 
         } 
-        else if (arrow.right.isDown) {
+        else if (arrow.right.isDown||keyD.isDown) {
             touch_left = false;
             touch_right =true;
         }
-        if (arrow.left.isDown == false) {
+        if (arrow.left.isDown == false&&keyA.isDown == false) {
             touch_left = false;
         } 
-        if (arrow.right.isDown == false) {
+        if (arrow.right.isDown == false&&keyD.isDown == false) {
             touch_right =false;
         }
-        if(arrow.down.isDown && skill_cool == false){
+        if((arrow.down.isDown||keyS.isDown) && skill_cool == false){
             if(aris_power == 0 && character_choice_num == 3&&skill_is == false&&play_character.skill_gaze > 0){
                 play_character.skill_gaze -= 33;
                 if(play_character.skill_gaze <= 0){
@@ -3012,7 +3020,7 @@ function key_pc(){
             //skill_image.setVisible(true);
         }
 
-        if(arrow.down.isUp){
+        if(arrow.down.isUp&&keyS.isUp){
             if(character_choice_num == 3 &&aris_power > 0 && aris_skill_is == false){
 
                 skill_use.bind(this)();
@@ -3061,6 +3069,8 @@ function nonomi_skill(){
                 if(Math.abs(game_monster_arr[k][0] - skill_nonomi_image[i].x)  < game_monster_image[k].width/2 + skill_nonomi_image[i].width/2){
                     if(Math.abs(game_monster_arr[k][1] - skill_nonomi_image[i].y)  < game_monster_image[k].height/2 + skill_nonomi_image[i].height/2)
                     {  
+
+                        game_score += 1;
                         spawn_expolosion(game_monster_image[k].x,game_monster_image[k].y);
                         game_monster_arr.splice(k, 1);
                         skill_nonomi_impact.splice(i, 1);
@@ -3070,6 +3080,8 @@ function nonomi_skill(){
             if(Math.abs(game_drop_heart.x - skill_nonomi_image[i].x)  < game_drop_heart.width/2 + skill_nonomi_image[i].width/2 &&game_drop_heart_is == true){
                 if(Math.abs(game_drop_heart.y - skill_nonomi_image[i].y)  < game_drop_heart.height/2 + skill_nonomi_image[i].height/2)
                     {  
+
+                        game_score += 1;
                     spawn_expolosion(game_drop_heart.x,game_drop_heart.y);
                     game_drop_heart_is = false;
                     game_drop_heart.setVisible(false);
@@ -3079,6 +3091,8 @@ function nonomi_skill(){
                 if(Math.abs(game_drop_weapon.x - skill_nonomi_image[i].x)  < game_drop_weapon.width/2 + skill_nonomi_image[i].width/2 &&game_drop_weapon_is == true){
                     if(Math.abs(game_drop_weapon.y - skill_nonomi_image[i].y)  < game_drop_weapon.height/2 + skill_nonomi_image[i].height/2)
                     {  
+
+                        game_score += 1;
                         spawn_expolosion(game_drop_weapon.x,game_drop_weapon.y);
                         game_drop_weapon_is = false;
                         game_drop_weapon.setVisible(false);
@@ -3088,6 +3102,8 @@ function nonomi_skill(){
                  if(Math.abs(game_drop_score.x - skill_nonomi_image[i].x)  < game_drop_score.width/2 + skill_nonomi_image[i].width/2 &&game_drop_score_is == true){
                     if(Math.abs(game_drop_score.y - skill_nonomi_image[i].y)  < game_drop_score.height/2 + skill_nonomi_image[i].height/2)
                     {  
+
+                        game_score += 1;
                         spawn_expolosion(game_drop_score.x,game_drop_score.y);
                         game_drop_score_is = false;
                         game_drop_score.setVisible(false);
@@ -3098,6 +3114,7 @@ function nonomi_skill(){
                  if(Math.abs(game_drop_bomb.x - skill_nonomi_image[i].x)  < game_drop_bomb.width/2 + skill_nonomi_image[i].width/2 &&game_drop_bomb_is == true){
                     if(Math.abs(game_drop_bomb.y - skill_nonomi_image[i].y)  < game_drop_bomb.height/2 + skill_nonomi_image[i].height/2)
                     {  
+                        game_score += 1;
                         spawn_expolosion(game_drop_bomb.x,game_drop_bomb.y);
                         game_drop_bomb_is = false;
                         game_drop_bomb.setVisible(false);
@@ -3109,7 +3126,7 @@ function nonomi_skill(){
                 }
 
             }
-            for(var i = skill_nonomi_impact.length ; i < 30;i++)
+            for(var i = skill_nonomi_impact.length ; i < 45;i++)
             {
                 skill_nonomi_image[i].setVisible(false);
 
@@ -3126,11 +3143,11 @@ function nonomi_skill(){
 }
 function churugi_skill(){
 
-    if(skill_is == true&&play_character.skill_gaze > 0)
+    if(skill_is == true)
     {
-        //play_character.skill_gaze -=25;
         if(Date.now() - skill_timer < 500 ){
         skill_impact.setVisible(true);
+
         //skill_impact.x = player_unit.x;
         skill_impact.y= player_unit.y - 280;
         skill_impact.setAlpha(1 - (Date.now() - skill_timer)/500);
@@ -3138,7 +3155,9 @@ function churugi_skill(){
             for(var i= 0; i <game_monster_arr.length ; i++){
                 if(Math.abs(game_monster_arr[i][0] - skill_impact.x)  < game_monster_image[i].width/2 + skill_impact.width/2 +50){
                     if(Math.abs(game_monster_arr[i][1] - skill_impact.y)  < game_monster_image[i].height/2 + skill_impact.height/2 +50)
-                    {  
+                    {       
+
+                            game_score += 1;
                             spawn_expolosion(game_monster_image[i].x,game_monster_image[i].y);
                             game_monster_arr.splice(i, 1);
                     }
@@ -3147,8 +3166,7 @@ function churugi_skill(){
         }
         }
         else{
-
-        skill_impact.setVisible(false);
+            skill_impact.setVisible(false);
         }
 
     }
@@ -3183,8 +3201,8 @@ function skill_sound(){
 }
 function hina_skill(){
 
-     if(skill_hina_impact.length == 0){
-            for(var i = 0 ; i < skill_hina_impact.length ; i++){
+    if(skill_hina_impact.length == 0){
+            for(var i = 0 ; i < 45 ; i++){
                 skill_hina_image[i].setVisible(false);
             }
     }
@@ -3216,6 +3234,8 @@ function hina_skill(){
                     if(Math.abs(game_monster_arr[k][0] - skill_hina_image[i].x)  < game_monster_image[k].width/2 + skill_hina_image[i].width/2){
                         if(Math.abs(game_monster_arr[k][1] - skill_hina_image[i].y)  < game_monster_image[k].height/2 + skill_hina_image[i].height/2)
                         {  
+
+                            game_score += 1;
                             spawn_expolosion(game_monster_image[k].x,game_monster_image[k].y);
                             game_monster_arr.splice(k, 1);
                             skill_hina_impact.splice(i, 1);
@@ -3225,6 +3245,8 @@ function hina_skill(){
                 if(Math.abs(game_drop_heart.x - skill_hina_image[i].x)  < game_drop_heart.width/2 + skill_hina_image[i].width/2 &&game_drop_heart_is == true){
                         if(Math.abs(game_drop_heart.y - skill_hina_image[i].y)  < game_drop_heart.height/2 + skill_hina_image[i].height/2)
                         {  
+
+                            game_score += 1;
                             spawn_expolosion(game_drop_heart.x,game_drop_heart.y);
                             game_drop_heart_is = false;
                             game_drop_heart.setVisible(false);
@@ -3233,7 +3255,9 @@ function hina_skill(){
                     }
                     if(Math.abs(game_drop_weapon.x - skill_hina_image[i].x)  < game_drop_weapon.width/2 + skill_hina_image[i].width/2 &&game_drop_weapon_is == true){
                         if(Math.abs(game_drop_weapon.y - skill_hina_image[i].y)  < game_drop_weapon.height/2 + skill_hina_image[i].height/2)
-                        {  
+                        {    
+
+                            game_score += 1;
                             spawn_expolosion(game_drop_weapon.x,game_drop_weapon.y);
                             game_drop_weapon_is = false;
                             game_drop_weapon.setVisible(false);
@@ -3243,6 +3267,8 @@ function hina_skill(){
                      if(Math.abs(game_drop_score.x - skill_hina_image[i].x)  < game_drop_score.width/2 + skill_hina_image[i].width/2 &&game_drop_score_is == true){
                         if(Math.abs(game_drop_score.y - skill_hina_image[i].y)  < game_drop_score.height/2 + skill_hina_image[i].height/2)
                         {  
+
+                            game_score += 1;
                             spawn_expolosion(game_drop_score.x,game_drop_score.y);
                             game_drop_score_is = false;
                             game_drop_score.setVisible(false);
@@ -3252,6 +3278,8 @@ function hina_skill(){
                     if(Math.abs(game_drop_bomb.x - skill_hina_image[i].x)  < game_drop_bomb.width/2 + skill_hina_image[i].width/2 &&game_drop_bomb_is == true){
                         if(Math.abs(game_drop_bomb.y - skill_hina_image[i].y)  < game_drop_bomb.height/2 + skill_hina_image[i].height/2)
                         {  
+
+                            game_score += 1;
                             spawn_expolosion(game_drop_bomb.x,game_drop_bomb.y);
                             game_drop_bomb_is = false;
                             game_drop_bomb.setVisible(false);
@@ -3264,17 +3292,19 @@ function hina_skill(){
 
 
             }
-            for(var i = skill_hina_impact.length ; i < 30;i++)
+            for(var i = skill_hina_impact.length ; i < 45;i++)
             {
                 skill_hina_image[i].setVisible(false);
-
             }
+
+            if(skill_hina_impact.length > 0){
             for (var i = 0 ; i  < skill_hina_impact.length ; i++){
 
                 skill_hina_image[i].x = skill_hina_impact[i][0];
                 skill_hina_image[i].y = skill_hina_impact[i][1];
                 skill_hina_image[i].setOrigin(0.5);
                 skill_hina_image[i].setRotation(Math.PI / 360 * skill_hina_impact[i][2]);
+            }
             }
         }
         if(play_character.skill_gaze <=0)
@@ -3332,6 +3362,8 @@ function skill_show()
                 if(Math.abs(game_monster_arr[i][0] - skill_impact.x)  < game_monster_image[i].width/2 + skill_impact.width/2){
                     if(Math.abs(game_monster_arr[i][1] - skill_impact.y)  < game_monster_image[i].height/2 + skill_impact.height/2)
                     {  
+
+                        game_score += 1;
                     spawn_expolosion(game_monster_image[i].x,game_monster_image[i].y);
                     game_monster_arr.splice(i, 1);
                     }
@@ -3341,15 +3373,18 @@ function skill_show()
         if(Math.abs(game_drop_heart.x - skill_impact.x)  < game_drop_heart.width/2 + skill_impact.width/2 &&game_drop_heart_is == true){
             if(Math.abs(game_drop_heart.y - skill_impact.y)  < game_drop_heart.height/2 + skill_impact.height/2)
                 {  
+
+                        game_score += 1;
                     spawn_expolosion(game_drop_heart.x,game_drop_heart.y);
                     game_drop_heart_is = false;
                     game_drop_heart.setVisible(false);
-                    skill_hina_impact.splice(i, 1);
                 }
             }
             if(Math.abs(game_drop_weapon.x - skill_impact.x)  < game_drop_weapon.width/2 + skill_impact.width/2 &&game_drop_weapon_is == true){
                 if(Math.abs(game_drop_weapon.y - skill_impact.y)  < game_drop_weapon.height/2 + skill_impact.height/2)
                 {  
+
+                        game_score += 1;
                     spawn_expolosion(game_drop_weapon.x,game_drop_weapon.y);
                     game_drop_weapon_is = false;
                     game_drop_weapon.setVisible(false);
@@ -3358,6 +3393,8 @@ function skill_show()
             if(Math.abs(game_drop_score.x - skill_impact.x)  < game_drop_score.width/2 + skill_impact.width/2 &&game_drop_score_is == true){
                 if(Math.abs(game_drop_score.y - skill_impact.y)  < game_drop_score.height/2 + skill_impact.height/2)
                 {  
+
+                        game_score += 1;
                     spawn_expolosion(game_drop_score.x,game_drop_score.y);
                     game_drop_score_is = false;
                     game_drop_score.setVisible(false);
@@ -3366,6 +3403,8 @@ function skill_show()
                if(Math.abs(game_drop_bomb.x - skill_impact.x)  < game_drop_bomb.width/2 + skill_impact.width/2 &&game_drop_bomb_is == true){
                 if(Math.abs(game_drop_bomb.y - skill_impact.y)  < game_drop_bomb.height/2 + skill_impact.height/2)
                 {  
+
+                        game_score += 1;
                     spawn_expolosion(game_drop_bomb.x,game_drop_bomb.y);
                     game_drop_bomb_is = false;
                     game_drop_bomb.setVisible(false);
@@ -3391,8 +3430,6 @@ function skill_show()
 function skill_use(){
     if(play_character.skill_gaze > 0 || aris_power != 0 && skill_cool == false){
         if(character_choice_num ==0){
-
-            console.log(skill_is);
             if(skill_is == false){
                 skill_is = true;
                 if(play_character.skill_gaze == 100){
@@ -3582,13 +3619,13 @@ function update() { // update 함수
     if(game_type =="in_game"){
         
 
-        if(play_character.skill_gaze == 0 && aris_power == 0){
+        if(play_character.skill_gaze == 0 && aris_power == 0&&character_choice_num != 2){
             skill_is = false;
         } 
         skill_gaze_text.setText(play_character.skill_gaze.toString() + '%');
         key_pc.bind(this)();
             //nonomi_skill();
-            skill_show.bind(this)();
+        skill_show.bind(this)();
         
         if(ingame_type == "game")
         {
